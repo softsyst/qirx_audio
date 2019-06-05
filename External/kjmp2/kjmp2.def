@@ -1,0 +1,7 @@
+LIBRARY  kjmp2.dll
+EXPORTS
+;
+; kjmp2 exports
+;
+mp2_initialize      @1
+mp2_decode			@2
