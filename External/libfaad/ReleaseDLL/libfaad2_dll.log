@@ -1,0 +1,97 @@
+﻿Build started 02-Apr-17 02:47:20.
+     1>Project "D:\fun\signalProc\qirx_deploy_test\qirx_dev3\ExternalDLLs\libfaad\libfaad-master\libfaad\libfaad2_dll.vcxproj" on node 2 (Rebuild target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I..\include /Zi /nologo /W3 /WX- /O2 /Ob1 /Oi /Ot /Oy- /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D libfaad2_dll_EXPORTS /D _VC80_UPGRADE=0x0700 /D _WINDLL /D _MBCS /GF /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\ReleaseDLL/" /Fd".\ReleaseDLL/vc120.pdb" /Gd /TC /analyze- /errorReport:prompt bits.c cfft.c common.c decoder.c drc.c drm_dec.c error.c filtbank.c hcr.c huffman.c ic_predict.c is.c lt_predict.c mdct.c mp4.c ms.c output.c pns.c ps_dec.c ps_syntax.c pulse.c rvlc.c sbr_dct.c sbr_dec.c sbr_e_nf.c sbr_fbt.c sbr_hfadj.c sbr_hfgen.c sbr_huff.c sbr_qmf.c sbr_syntax.c sbr_tf_grid.c specrec.c ssr.c ssr_fb.c ssr_ipqf.c syntax.c tns.c
+         bits.c
+         cfft.c
+         common.c
+         decoder.c
+     1>decoder.c(220): warning C4146: unary minus operator applied to unsigned type, result still unsigned
+     1>decoder.c(1097): warning C4018: '<' : signed/unsigned mismatch
+         drc.c
+         drm_dec.c
+         error.c
+         filtbank.c
+         hcr.c
+     1>hcr.c(228): warning C4101: 'bitsleft' : unreferenced local variable
+     1>hcr.c(228): warning C4101: 'codewordsleft' : unreferenced local variable
+         huffman.c
+         ic_predict.c
+         is.c
+         lt_predict.c
+     1>lt_predict.c(169): warning C4244: 'return' : conversion from 'long' to 'int16_t', possible loss of data
+         mdct.c
+         mp4.c
+         ms.c
+         output.c
+         pns.c
+         ps_dec.c
+         ps_syntax.c
+         Generating Code...
+         Compiling...
+         pulse.c
+         rvlc.c
+         sbr_dct.c
+         sbr_dec.c
+         sbr_e_nf.c
+         sbr_fbt.c
+         sbr_hfadj.c
+         sbr_hfgen.c
+         sbr_huff.c
+         sbr_qmf.c
+         sbr_syntax.c
+         sbr_tf_grid.c
+         specrec.c
+         ssr.c
+         ssr_fb.c
+         ssr_ipqf.c
+         syntax.c
+     1>syntax.c(2633): warning C4146: unary minus operator applied to unsigned type, result still unsigned
+         tns.c
+         Generating Code...
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"..\..\..\..\Release\libfaad2.dll" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /DEF:".\libfaad2.def" /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\ReleaseDLL/libfaad2.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\ReleaseDLL/libfaad2.lib" /MACHINE:X86 /SAFESEH /MACHINE:I386 /DLL .\ReleaseDLL/bits.obj
+         .\ReleaseDLL/cfft.obj
+         .\ReleaseDLL/common.obj
+         .\ReleaseDLL/decoder.obj
+         .\ReleaseDLL/drc.obj
+         .\ReleaseDLL/drm_dec.obj
+         .\ReleaseDLL/error.obj
+         .\ReleaseDLL/filtbank.obj
+         .\ReleaseDLL/hcr.obj
+         .\ReleaseDLL/huffman.obj
+         .\ReleaseDLL/ic_predict.obj
+         .\ReleaseDLL/is.obj
+         .\ReleaseDLL/lt_predict.obj
+         .\ReleaseDLL/mdct.obj
+         .\ReleaseDLL/mp4.obj
+         .\ReleaseDLL/ms.obj
+         .\ReleaseDLL/output.obj
+         .\ReleaseDLL/pns.obj
+         .\ReleaseDLL/ps_dec.obj
+         .\ReleaseDLL/ps_syntax.obj
+         .\ReleaseDLL/pulse.obj
+         .\ReleaseDLL/rvlc.obj
+         .\ReleaseDLL/sbr_dct.obj
+         .\ReleaseDLL/sbr_dec.obj
+         .\ReleaseDLL/sbr_e_nf.obj
+         .\ReleaseDLL/sbr_fbt.obj
+         .\ReleaseDLL/sbr_hfadj.obj
+         .\ReleaseDLL/sbr_hfgen.obj
+         .\ReleaseDLL/sbr_huff.obj
+         .\ReleaseDLL/sbr_qmf.obj
+         .\ReleaseDLL/sbr_syntax.obj
+         .\ReleaseDLL/sbr_tf_grid.obj
+         .\ReleaseDLL/specrec.obj
+         .\ReleaseDLL/ssr.obj
+         .\ReleaseDLL/ssr_fb.obj
+         .\ReleaseDLL/ssr_ipqf.obj
+         .\ReleaseDLL/syntax.obj
+         .\ReleaseDLL/tns.obj
+            Creating library .\ReleaseDLL/libfaad2.lib and object .\ReleaseDLL/libfaad2.exp
+         libfaad2_dll.vcxproj -> D:\fun\signalProc\qirx_deploy_test\qirx_dev3\ExternalDLLs\libfaad\libfaad-master\libfaad\..\..\..\..\Release\libfaad2.dll
+     1>Done Building Project "D:\fun\signalProc\qirx_deploy_test\qirx_dev3\ExternalDLLs\libfaad\libfaad-master\libfaad\libfaad2_dll.vcxproj" (Rebuild target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:02.55
