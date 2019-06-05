@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{75EB9B29-F49A-4711-8EDA-8DC341C2D368}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>qirx_audio</RootNamespace>
+    <AssemblyName>qirx_audio</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\External\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="NAudio, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\qirx_EmbeddedResources\Release\qirx_audio\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Audio\audioBase.cs" />
+    <Compile Include="Audio\dabAACdecoder.cs" />
+    <Compile Include="Audio\dabAACInfo.cs" />
+    <Compile Include="Audio\dabDecoderDAB.cs" />
+    <Compile Include="Audio\dabMP2decoder.cs" />
+    <Compile Include="mp4.cs" />
+    <Compile Include="PInvoke\PInvokers_clib.cs" />
+    <Compile Include="PInvoke\PInvokers_kjmp2.cs" />
+    <Compile Include="PInvoke\PInvokers_libfaad.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="qirxInterfaces\dabInterfaceItems.cs" />
+    <Compile Include="qirxInterfaces\IAACInfo.cs" />
+    <Compile Include="qirxInterfaces\IAudioSink.cs" />
+    <Compile Include="qirxInterfaces\ILogger.cs" />
+    <Compile Include="qirxInterfaces\IPopupDialog.cs" />
+    <Compile Include="qirxInterfaces\logging.cs" />
+    <Compile Include="qirxInterfaces\MsgBoxFactory.cs" />
+    <Compile Include="Audio\wavAudio.cs" />
+    <Compile Include="Utilities\Assemblies\AssembliesHelper.cs" />
+    <Compile Include="Utilities\Configuration\configFile.cs" />
+    <Compile Include="Utilities\Configuration\configFileProgram.cs" />
+    <Compile Include="Utilities\Configuration\configFileWavOut.cs" />
+    <Compile Include="Utilities\Configuration\configuration.cs" />
+    <Compile Include="Utilities\ConstSizeBuffer.cs" />
+    <Compile Include="Utilities\Converters\IntToStringConverter.cs" />
+    <Compile Include="Utilities\Converters\StringToBoolConverter.cs" />
+    <Compile Include="Utilities\HexUtil.cs" />
+    <Compile Include="Utilities\IO\FilesPathHelper.cs" />
+    <Compile Include="Utilities\SafeCollections\Locks.cs" />
+    <Compile Include="Utilities\SafeCollections\SafeDictionary.cs" />
+    <Compile Include="Utilities\SafeCollections\SafeQueue.cs" />
+    <Compile Include="Utilities\XML\XMLHelper.cs" />
+    <Compile Include="Utilities\XML\XMLObjectPersistor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
