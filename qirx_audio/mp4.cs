@@ -233,7 +233,7 @@ namespace softsyst.qirx.Audio
         internal void UDPCmdReceiveSync()
         {
             Console.WriteLine("Command thread entered.");
-            udpCmd.Client.ReceiveTimeout = 200;
+            udpCmd.Client.ReceiveTimeout =  200;
             while (true)
             {
                 try

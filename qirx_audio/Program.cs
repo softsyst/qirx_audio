@@ -44,6 +44,7 @@ namespace softsyst.qirx.Audio
             Console.WriteLine("\tCommands: \tRemote endpoint:\t 127.0.0.1:8768");
             Console.WriteLine("\tCommands: \tOwn endpoint: \t\t 127.0.0.1:8769\n");
 
+
             while(true)
             {
 

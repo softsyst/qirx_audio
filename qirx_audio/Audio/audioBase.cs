@@ -242,6 +242,8 @@ namespace softsyst.qirx.Audio
         {
             try
             {
+                // if no config file available, the default values apply,
+                // in particular mute == false
                 cfg.readConfiguration();
                 wavOutDir = cfg.wavOutDir;
                 udpPort = cfg.udpPort;

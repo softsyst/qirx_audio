@@ -31,6 +31,8 @@ using softsyst.Generic;
 
 namespace softsyst.qirx.configuration
 {
+    // in case no config file is available, the default or initial values apply.
+    // !!In particular mute == false!!
     public class configFileWavOut : configFile
     {
         logging<configFileWavOut> logger = new logging<configFileWavOut>(logging2.log);

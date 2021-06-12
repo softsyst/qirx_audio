@@ -46,6 +46,7 @@ namespace softsyst.qirx.configuration
         /// <param name="create">Call with true only</param>
         public static bool createOrVerifyConfigFile(bool create = true)
         {
+            return false;
             string path = System.AppDomain.CurrentDomain.BaseDirectory + configFileName;
             if (!File.Exists(path))
             {
