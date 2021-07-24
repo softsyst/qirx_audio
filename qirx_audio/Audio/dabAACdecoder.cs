@@ -139,7 +139,7 @@ namespace softsyst.qirx.audiodecoder
 
             try
             {
-                fixed (byte* p = &buffer[0])
+                fixed (byte* p = &buffer[2]) //index 2 because of header id bytes 0xff, 0xee
                 {
                     int result = libfaadCalls.NeAACDecInit2(hDecoder,
                                         p,

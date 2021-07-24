@@ -43,7 +43,12 @@ namespace softsyst.qirx.Audio
         /// <summary>
         /// AAC stream
         /// </summary>
-        BUFFER_AAC,
+        BUFFER_AAC_DTS,
+
+        /// <summary>
+        /// AAC stream
+        /// </summary>
+        BUFFER_AAC_ASC,
 
         /// <summary>
         /// DAB stream, ONE_FRAME type or first frame of TWO_FRAME type
@@ -233,6 +238,8 @@ namespace softsyst.qirx.Audio
         internal void UDPCmdReceiveSync()
         {
             Console.WriteLine("Command thread entered.");
+            if (udpCmd == null || udpCmd.Client == null)
+                return;
             udpCmd.Client.ReceiveTimeout =  200;
             while (true)
             {
@@ -332,7 +339,7 @@ namespace softsyst.qirx.Audio
             return true;
         }
 
-
+        static object lockParseHdr = new object();
         /// <summary>
         /// Audio strem receiving thread fct
         /// </summary>
@@ -343,11 +350,12 @@ namespace softsyst.qirx.Audio
             {
                 try
                 {
+                    
                     byte[] buf = udp.Receive(ref remoteIp);
 
                     BufferType buftype = parseHeader(buf);
 
-                    if (buftype == BufferType.BUFFER_AAC)
+                    if (buftype == BufferType.BUFFER_AAC_DTS || buftype == BufferType.BUFFER_AAC_ASC )
                     {
                         if (Mode != AudioMode.MODE_AAC)
                         {
@@ -355,7 +363,7 @@ namespace softsyst.qirx.Audio
                         }
 
                         byte[] pcm16 = null;
-                        if (processBuffer(buf, out pcm16))
+                        if (processBuffer(buf, out pcm16, buftype))
                         {
                             AudioStateArray = collectAudioStates();
 
@@ -430,13 +438,13 @@ namespace softsyst.qirx.Audio
         /// <param name="rxBuf">AAC coded audio buffer</param>
         /// <param name="pcm16">PCM16 decoded audio buffer</param>
         /// <returns></returns>
-        private bool processBuffer(byte[] rxBuf, out byte[] pcm16)
+        private bool processBuffer(byte[] rxBuf, out byte[] pcm16, BufferType buftype)
         {
             pcm16 = null; //this one receives the decoded bytes
             // this is a complete aac frame with 960 samples
             if (!_initialized)
             {
-                if (!initialize(rxBuf))
+                if (!initialize(rxBuf, buftype))
                     return false;
             }
 
@@ -446,6 +454,11 @@ namespace softsyst.qirx.Audio
             int decoderChannels = 0;
             int decoderSamplingRate = 0;
             int startIx = 0;
+
+            // the asc header is always contained and ignored here
+            // the first two bytes are the buffer type id of 0xff, 0xee
+            if (buftype == BufferType.BUFFER_AAC_ASC)
+                startIx = 4;
 
             int error = AACDecoder.decode(hDecoder, rxBuf, startIx, out pcm16, out bytesConsumed,
                 out decoderSamplingRate, out decoderChannels, out decoderObjectType);
@@ -500,13 +513,23 @@ namespace softsyst.qirx.Audio
         /// </summary>
         /// <param name="rxBuf"></param>
         /// <returns></returns>
-        private bool initialize(byte[] rxBuf)
+        private bool initialize(byte[] rxBuf, BufferType buftype)
         {
-            //parse header and initialize the decoder
-            init_result = AACDecoder.init(hDecoder,
-                                                rxBuf,
-                                                ref sample_rate,
-                                                ref channels);
+            if (buftype == BufferType.BUFFER_AAC_DTS)
+                //parse header and initialize the decoder
+                init_result = AACDecoder.init(hDecoder,
+                                                    rxBuf,
+                                                    ref sample_rate,
+                                                    ref channels);
+            else if (buftype == BufferType.BUFFER_AAC_ASC)
+                //parse header and initialize the decoder
+                init_result = AACDecoder.init2(hDecoder,
+                                                    rxBuf,
+                                                    ref sample_rate,
+                                                    ref channels);
+            string s = $"Initialized for AAC with {buftype} mode";
+            Console.WriteLine(s);
+
             AACInfo.DecoderSamplingRate = sample_rate;
             AACInfo.DecoderChannels = channels;
             if (init_result != 0)
@@ -518,11 +541,11 @@ namespace softsyst.qirx.Audio
                     throw new Exception("BP");
                 //err = UnsafeCommon.UnsafeAsciiBytesToString(b, 0);
 
-                string s = string.Format("Error initializing decoder library: {0}", err);
+                string ss = string.Format("Error initializing decoder library: {0}", err);
                 AACDecoder.Close(hDecoder);
                 hDecoder = (IntPtr)0;
                 _initialized = false;
-                logger.Error(s);
+                logger.Error(ss);
                 return false;
             }
 
@@ -636,19 +659,27 @@ namespace softsyst.qirx.Audio
         // 
         private BufferType parseHeader(byte[] buf)
         {
-            if (buf[0] == 0xff && buf[1] == 0xf1)
-                return BufferType.BUFFER_AAC;
+            lock (lockParseHdr)
+            {
+                if (buf[0] == 0xff && buf[1] == 0xf1)
+                    return BufferType.BUFFER_AAC_DTS;
 
-            if (buf[0] == 0xff && (buf[1] & 0xf0) == 0xf0)
-                return BufferType.BUFFER_MP2_1;
-
-            if (buf[0] == 0x55 && buf[1] == 0xaa)
-                return BufferType.BUFFER_COMMAND;
-
-            if (Mode == AudioMode.MODE_MP2) // then second frame of TWO_FRAMES MP2 service
-                return BufferType.BUFFER_MP2_2;
-
-            return BufferType.BUFFER_NIL;
+                else if (buf[0] == 0xff && buf[1] == 0xee)
+                    return BufferType.BUFFER_AAC_ASC;
+                //else
+                //{
+                //    //// the MP2 is not "clean", due to the 2nd buffer's unknown first two bytes
+                //    //// Do NOT use the MODE_MP2 yet
+                //    //if (buf[0] == 0xff && (buf[1] & 0xf0) == 0xf0)
+                //    //    return BufferType.BUFFER_MP2_1;
+                //    //if (Mode == AudioMode.MODE_MP2) // then second frame of TWO_FRAMES MP2 service
+                //    //    return BufferType.BUFFER_MP2_2;
+                //}
+                else if (buf[0] == 0x55 && buf[1] == 0xaa)
+                    return BufferType.BUFFER_COMMAND;
+                else
+                    return BufferType.BUFFER_NIL;
+            }
         }
     }
 }

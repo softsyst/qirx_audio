@@ -31,8 +31,8 @@ namespace softsyst.qirx.Audio
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("QIRX AAC stream player V1.0");
-            Console.WriteLine("Copyright (c) softsyst GmbH and Clem Schmidt, 2019, www.softsyst.com\n");
+            Console.WriteLine("QIRX AAC stream player V1.1");
+            Console.WriteLine("Copyright (c) softsyst GmbH and Clem Schmidt, 2019-2021, qirx.softsyst.com\n");
 
             Console.WriteLine("libfaad2 is Copyright (C) 2003-2005 M. Bakker, Nero AG, http://www.nero.com\n");
             Console.WriteLine("NAudio is an open source .NET audio library written by Mark Heath (mark.heath@gmail.com)");
