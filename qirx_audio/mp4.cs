@@ -131,6 +131,11 @@ namespace softsyst.qirx.Audio
         internal bool terminateCmdThread = false;
 
         /// <summary>
+        /// Flag used from cmd thread on arrival of a new service
+        /// </summary>
+        internal bool terminatRxThread = false;
+
+        /// <summary>
         /// Audio sampling rate
         /// </summary>
         int sample_rate;
@@ -216,12 +221,13 @@ namespace softsyst.qirx.Audio
                 logger.Info(string.Format("\nUDP connected to: {0}:{1}", ip.Address, ip.Port));
                 Console.WriteLine(string.Format("\nUDP connected to: {0}:{1}", ip.Address, ip.Port));
             }
-            //hDecoder = AACDecoder.open();
-            //if (hDecoder == (IntPtr)0)
-            //{
-            //    //_msgBox.Show("Open AACDecoder failed");
-            //    return false;
-            //}
+            AACDecoder = new aacDecoder();
+            hDecoder = AACDecoder.open();
+            if (hDecoder == (IntPtr)0)
+            {
+                //_msgBox.Show("Open AACDecoder failed");
+                return false;
+            }
 
             if (udpCmd != null)
             {
@@ -350,6 +356,11 @@ namespace softsyst.qirx.Audio
             {
                 try
                 {
+                    if (terminatRxThread)
+                    {
+                        reset();
+                        break;
+                    }
                     
                     byte[] buf = udp.Receive(ref remoteIp);
 
@@ -430,6 +441,7 @@ namespace softsyst.qirx.Audio
         {
             clear();
             _initialized = false;
+            terminatRxThread = false;
         }
 
         /// <summary>
@@ -488,13 +500,17 @@ namespace softsyst.qirx.Audio
 
         private bool initializeMode (AudioMode mode)
         {
+            // Service Changed indication
             if (mode == AudioMode.MODE_AAC)
             {
                 Mode = AudioMode.MODE_AAC;
-                AACDecoder = new aacDecoder();
-                hDecoder = AACDecoder.open();
-                if (hDecoder != (IntPtr)0)
-                    return true;
+                if (_initialized)
+                    terminatRxThread = true;
+                return true;
+                //AACDecoder = new aacDecoder();
+                //hDecoder = AACDecoder.open();
+                //if (hDecoder != (IntPtr)0)
+                //    return true;
 
             }
             else if (mode == AudioMode.MODE_MP2)
@@ -529,6 +545,9 @@ namespace softsyst.qirx.Audio
                                                     ref channels);
             string s = $"Initialized for AAC with {buftype} mode";
             Console.WriteLine(s);
+            s = $"Sample rate = {sample_rate}";
+            Console.WriteLine(s);
+            s = $"Channels = {channels}";
 
             AACInfo.DecoderSamplingRate = sample_rate;
             AACInfo.DecoderChannels = channels;
@@ -608,56 +627,62 @@ namespace softsyst.qirx.Audio
                 udp.Close();
             udp = null;
             Console.WriteLine("UDP closed");
+            if (hDecoder != (IntPtr)0)
+            {
+                AACDecoder.Close(hDecoder);
+                hDecoder = (IntPtr)0;
+                Console.WriteLine("AAC Decoder closed");
+            }
         }
 
 
-        /**
-        //https://wiki.multimedia.cx/index.php?title=MPEG-4_Audio
-        There are 13 supported frequencies:
+            /**
+            //https://wiki.multimedia.cx/index.php?title=MPEG-4_Audio
+            There are 13 supported frequencies:
 
-        0: 96000 Hz
-        1: 88200 Hz
-        2: 64000 Hz
-        3: 48000 Hz
-        4: 44100 Hz
-        5: 32000 Hz
-        6: 24000 Hz
-        7: 22050 Hz
-        8: 16000 Hz
-        9: 12000 Hz
-        10: 11025 Hz
-        11: 8000 Hz
-        12: 7350 Hz
-        13: Reserved
-        14: Reserved
-        15: frequency is written explictly
-         * **/
+            0: 96000 Hz
+            1: 88200 Hz
+            2: 64000 Hz
+            3: 48000 Hz
+            4: 44100 Hz
+            5: 32000 Hz
+            6: 24000 Hz
+            7: 22050 Hz
+            8: 16000 Hz
+            9: 12000 Hz
+            10: 11025 Hz
+            11: 8000 Hz
+            12: 7350 Hz
+            13: Reserved
+            14: Reserved
+            15: frequency is written explictly
+             * **/
 
-        //https://wiki.multimedia.cx/index.php?title=ADTS
-        //ADTS Header Structure
-        //AAAAAAAA AAAABCCD EEFFFFGH HHIJKLMM MMMMMMMM MMMOOOOO OOOOOOPP(QQQQQQQQ QQQQQQQQ)
+            //https://wiki.multimedia.cx/index.php?title=ADTS
+            //ADTS Header Structure
+            //AAAAAAAA AAAABCCD EEFFFFGH HHIJKLMM MMMMMMMM MMMOOOOO OOOOOOPP(QQQQQQQQ QQQQQQQQ)
 
-        //Header consists of 7 or 9 bytes(without or with CRC).
-        //Letter Length(bits)   Description
-        //A 	12 	syncword 0xFFF, all bits must be 1
-        //B 	1 	MPEG Version: 0 for MPEG-4, 1 for MPEG-2
-        //C 	2 	Layer: always 0
-        //D 	1 	protection absent, Warning, set to 1 if there is no CRC and 0 if there is CRC
-        //E 	2 	profile, the MPEG-4 Audio Object Type minus 1
-        //F 	4 	MPEG-4 Sampling Frequency Index(15 is forbidden)
-        //G 	1 	private bit, guaranteed never to be used by MPEG, set to 0 when encoding, ignore when decoding
-        //H 	3 	MPEG-4 Channel Configuration(in the case of 0, the channel configuration is sent via an inband PCE)
-        //I 	1 	originality, set to 0 when encoding, ignore when decoding
-        //J 	1 	home, set to 0 when encoding, ignore when decoding
-        //K 	1 	copyrighted id bit, the next bit of a centrally registered copyright identifier, set to 0 when encoding, ignore when decoding
-        //L 	1 	copyright id start, signals that this frame's copyright id bit is the first bit of the copyright id, set to 0 when encoding, ignore when decoding
-        //M 	13 	frame length, this value must include 7 or 9 bytes of header length: FrameLength = (ProtectionAbsent == 1 ? 7 : 9) + size(AACFrame)
-        //O 	11 	Buffer fullness
-        //P 	2 	Number of AAC frames(RDBs) in ADTS frame minus 1, for maximum compatibility always use 1 AAC frame per ADTS frame
-        //Q 	16 	CRC if protection absent is 0         
+            //Header consists of 7 or 9 bytes(without or with CRC).
+            //Letter Length(bits)   Description
+            //A 	12 	syncword 0xFFF, all bits must be 1
+            //B 	1 	MPEG Version: 0 for MPEG-4, 1 for MPEG-2
+            //C 	2 	Layer: always 0
+            //D 	1 	protection absent, Warning, set to 1 if there is no CRC and 0 if there is CRC
+            //E 	2 	profile, the MPEG-4 Audio Object Type minus 1
+            //F 	4 	MPEG-4 Sampling Frequency Index(15 is forbidden)
+            //G 	1 	private bit, guaranteed never to be used by MPEG, set to 0 when encoding, ignore when decoding
+            //H 	3 	MPEG-4 Channel Configuration(in the case of 0, the channel configuration is sent via an inband PCE)
+            //I 	1 	originality, set to 0 when encoding, ignore when decoding
+            //J 	1 	home, set to 0 when encoding, ignore when decoding
+            //K 	1 	copyrighted id bit, the next bit of a centrally registered copyright identifier, set to 0 when encoding, ignore when decoding
+            //L 	1 	copyright id start, signals that this frame's copyright id bit is the first bit of the copyright id, set to 0 when encoding, ignore when decoding
+            //M 	13 	frame length, this value must include 7 or 9 bytes of header length: FrameLength = (ProtectionAbsent == 1 ? 7 : 9) + size(AACFrame)
+            //O 	11 	Buffer fullness
+            //P 	2 	Number of AAC frames(RDBs) in ADTS frame minus 1, for maximum compatibility always use 1 AAC frame per ADTS frame
+            //Q 	16 	CRC if protection absent is 0         
 
-        // 
-        private BufferType parseHeader(byte[] buf)
+            // 
+            private BufferType parseHeader(byte[] buf)
         {
             lock (lockParseHdr)
             {
