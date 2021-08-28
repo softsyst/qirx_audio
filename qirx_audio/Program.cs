@@ -31,7 +31,7 @@ namespace softsyst.qirx.Audio
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("QIRX AAC stream player V1.2");
+            Console.WriteLine("QIRX AAC stream player V1.3");
             Console.WriteLine("Copyright (c) softsyst GmbH and Clem Schmidt, 2019-2021, qirx.softsyst.com\n");
 
             Console.WriteLine("libfaad2 is Copyright (C) 2003-2005 M. Bakker, Nero AG, http://www.nero.com\n");
@@ -44,7 +44,11 @@ namespace softsyst.qirx.Audio
             Console.WriteLine("\tCommands: \tRemote endpoint:\t 127.0.0.1:8768");
             Console.WriteLine("\tCommands: \tOwn endpoint: \t\t 127.0.0.1:8769\n");
 
-
+            // Endless loop, only terminated by closing the exe.
+            // The two threads are created on startup and/or selection of a service,
+            // one for the commands, and one for the audio stream to be decoded.
+            // Both run until the next service is selected. 
+            // Then, the loop continues.
             while(true)
             {
 

@@ -206,6 +206,7 @@ namespace softsyst.qirx.Audio
             UDPPort
         }
 
+        static object lockProcessBuffer = new object();
 
 
         public mp4()
@@ -238,6 +239,28 @@ namespace softsyst.qirx.Audio
             return true;
         }
 
+        private void processCommand(byte[] buf)
+        {
+            try
+            {
+                BufferType buftype = parseHeader(buf);
+
+                if (buftype == BufferType.BUFFER_COMMAND)
+                {
+                    byte[] response = new byte[1];
+                    if (processCmd(buf))
+                        response[0] = 1;
+                    else
+                        response[0] = 0xff;
+                    udpCmd.Send(response, response.Length);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         /// <summary>
         /// Command receiving thread
         /// </summary>
@@ -253,24 +276,16 @@ namespace softsyst.qirx.Audio
                 {
                     byte[] buf = udpCmd.Receive(ref remoteIpCmd);
 
-                    if (terminateCmdThread)
-                        break;
-                    if (buf == null || buf.Length == 0)
-                        continue;
-
-                    BufferType buftype = parseHeader(buf);
-
-                    if (buftype == BufferType.BUFFER_COMMAND)
+                    lock (lockProcessBuffer)
                     {
-                        byte[] response = new byte[1];
-                        if (processCmd(buf))
-                            response[0] = 1;
-                        else
-                            response[0] = 0xff;
-                        udpCmd.Send(response, response.Length);
+                        if (terminateCmdThread)
+                            break;
+                        if (buf == null || buf.Length == 0)
+                            continue;
+                        processCommand(buf);
                     }
                 }
-                catch (Exception )
+                catch (Exception)
                 {
                     if (terminateCmdThread)
                         break;
@@ -299,15 +314,11 @@ namespace softsyst.qirx.Audio
 
                     switch (cmd)
                     {
+                        // Command arrives on service change
                         case AudioCommands.MODE:
                             AudioMode mode = (AudioMode)par;
-                            if (!initializeMode(mode))
-                            {
-                                Console.WriteLine($"Mode {mode} setting error ");
-                                return false;
-                            }
-                            else
-                                Console.WriteLine($"Mode {mode} set ");
+                            Console.WriteLine($"Mode {mode} set ");
+                            terminatRxThread = true;
                             break;
                         case AudioCommands.MUTE:
                             if (Mode == AudioMode.MODE_NIL)
@@ -345,7 +356,6 @@ namespace softsyst.qirx.Audio
             return true;
         }
 
-        static object lockParseHdr = new object();
         /// <summary>
         /// Audio strem receiving thread fct
         /// </summary>
@@ -356,22 +366,44 @@ namespace softsyst.qirx.Audio
             {
                 try
                 {
-                    if (terminatRxThread)
-                    {
-                        reset();
-                        break;
-                    }
-                    
                     byte[] buf = udp.Receive(ref remoteIp);
 
-                    BufferType buftype = parseHeader(buf);
+                    bool result = processAACBuffer(buf);
+                    if (!result)
+                        break;
+                }
+                catch (Exception )
+                {
+                    break;
+                }
+            }
+            reset();
+        }
 
-                    if (buftype == BufferType.BUFFER_AAC_DTS || buftype == BufferType.BUFFER_AAC_ASC )
+        private bool processAACBuffer(byte[] buf)
+        {
+            bool result = true;
+            lock (lockProcessBuffer)
+            {
+                // This MUST be within the lock. Otherwise a race can occur and a possible crash in the libfaad decoder.
+                if (terminatRxThread)
+                {
+                    return false;
+                }
+
+                BufferType buftype = parseHeader(buf);
+
+                if (buftype == BufferType.BUFFER_AAC_DTS || buftype == BufferType.BUFFER_AAC_ASC)
+                {
+                    if (!_initialized)
                     {
-                        if (Mode != AudioMode.MODE_AAC)
+                        if (initialize(buf, buftype))
                         {
-                            initializeMode(AudioMode.MODE_AAC);
+                            result = true;
                         }
+                    }
+                    else
+                    {
 
                         byte[] pcm16 = null;
                         if (processBuffer(buf, out pcm16, buftype))
@@ -386,62 +418,23 @@ namespace softsyst.qirx.Audio
 
                                 if (udp.Send(concat, concat.Length) != concat.Length)
                                 {
-                                    reset();
-                                    break;
+                                    result = false;
                                 }
                             }
                         }
                         else
                         {
-                            reset();
-                            break;
+                            result = false;
                         }
                     }
-
-                    else if (buftype == BufferType.BUFFER_MP2_1 || buftype == BufferType.BUFFER_MP2_2 )
-                    {
-                        if (Mode != AudioMode.MODE_MP2)
-                        {
-                            initializeMode(AudioMode.MODE_MP2);
-                        }
-
-                        byte[] pcm16 = null;
-                        if (DABDecoder.decode(buf, out pcm16, buftype))
-                        {
-                            AudioStateArray = DABDecoder.collectAudioStates(pcm16 != null);
-
-                            if (pcm16 != null && AudioStateArray != null)
-                            {
-                                var concat = new byte[AudioStateArray.Length + pcm16.Length];
-                                AudioStateArray.CopyTo(concat, 0);
-                                pcm16.CopyTo(concat, AudioStateArray.Length);
-
-                                if (udp.Send(concat, concat.Length) != concat.Length)
-                                {
-                                    reset();
-                                    break;
-                                }
-                            }
-                            else if (pcm16 == null)
-                            {
-                                udp.Send(AudioStateArray, AudioStateArray.Length);
-                            }
-                        }
-                        }
                 }
-                catch (Exception )
-                {
-                    reset();
-                    break;
-                }
+                return result;
             }
         }
 
         private void reset()
         {
             clear();
-            _initialized = false;
-            terminatRxThread = false;
         }
 
         /// <summary>
@@ -452,27 +445,22 @@ namespace softsyst.qirx.Audio
         /// <returns></returns>
         private bool processBuffer(byte[] rxBuf, out byte[] pcm16, BufferType buftype)
         {
+            bool result = false;
             pcm16 = null; //this one receives the decoded bytes
-            // this is a complete aac frame with 960 samples
-            if (!_initialized)
-            {
-                if (!initialize(rxBuf, buftype))
-                    return false;
-            }
+                            // this is a complete aac frame with 960 samples
 
             //next does not include the header (initialized with asc), works with all bitrates
-            int bytesConsumed;
             int decoderObjectType = 0;
             int decoderChannels = 0;
             int decoderSamplingRate = 0;
-            int startIx = 0;
 
             // the asc header is always contained and ignored here
             // the first two bytes are the buffer type id of 0xff, 0xee
-            if (buftype == BufferType.BUFFER_AAC_ASC)
-                startIx = 4;
+            if (buftype != BufferType.BUFFER_AAC_ASC)
+                goto exitFunc;
 
-            int error = AACDecoder.decode(hDecoder, rxBuf, startIx, out pcm16, out bytesConsumed,
+            int startIx = 4;
+            int error = AACDecoder.decode(hDecoder, rxBuf, startIx, out pcm16,
                 out decoderSamplingRate, out decoderChannels, out decoderObjectType);
             AACInfo.DecoderSamplingRate = decoderSamplingRate;
             AACInfo.DecoderChannels = decoderChannels;
@@ -484,7 +472,7 @@ namespace softsyst.qirx.Audio
             {
                 string s = AACDecoder.getErrorMessage((byte)error);
                 logger.Error(s);
-                return false;
+                goto exitFunc;
             }
             else
             {
@@ -493,36 +481,13 @@ namespace softsyst.qirx.Audio
                     waudio.AddSamples(pcm16Buf, 0, pcm16Buf.Length);
                 //else is a normal operating case indicating that the const size buffer is not yet ready
             }
-            return true;
+            result = true;
+
+            exitFunc:
+                return result;
         }
 
         AudioMode Mode { get; set; } = AudioMode.MODE_NIL;
-
-        private bool initializeMode (AudioMode mode)
-        {
-            // Service Changed indication
-            if (mode == AudioMode.MODE_AAC)
-            {
-                Mode = AudioMode.MODE_AAC;
-                if (_initialized)
-                    terminatRxThread = true;
-                return true;
-                //AACDecoder = new aacDecoder();
-                //hDecoder = AACDecoder.open();
-                //if (hDecoder != (IntPtr)0)
-                //    return true;
-
-            }
-            else if (mode == AudioMode.MODE_MP2)
-            {
-                Mode = AudioMode.MODE_MP2;
-                DABDecoder = new dabDecoderDAB();
-                return true;
-            }
-
-            Mode = AudioMode.MODE_NIL;
-            return false;
-        }
 
         /// <summary>
         /// Init AAC
@@ -682,29 +647,26 @@ namespace softsyst.qirx.Audio
             //Q 	16 	CRC if protection absent is 0         
 
             // 
-            private BufferType parseHeader(byte[] buf)
+        private BufferType parseHeader(byte[] buf)
         {
-            lock (lockParseHdr)
-            {
-                if (buf[0] == 0xff && buf[1] == 0xf1)
-                    return BufferType.BUFFER_AAC_DTS;
+            if (buf[0] == 0xff && buf[1] == 0xf1)
+                return BufferType.BUFFER_AAC_DTS;
 
-                else if (buf[0] == 0xff && buf[1] == 0xee)
-                    return BufferType.BUFFER_AAC_ASC;
-                //else
-                //{
-                //    //// the MP2 is not "clean", due to the 2nd buffer's unknown first two bytes
-                //    //// Do NOT use the MODE_MP2 yet
-                //    //if (buf[0] == 0xff && (buf[1] & 0xf0) == 0xf0)
-                //    //    return BufferType.BUFFER_MP2_1;
-                //    //if (Mode == AudioMode.MODE_MP2) // then second frame of TWO_FRAMES MP2 service
-                //    //    return BufferType.BUFFER_MP2_2;
-                //}
-                else if (buf[0] == 0x55 && buf[1] == 0xaa)
-                    return BufferType.BUFFER_COMMAND;
-                else
-                    return BufferType.BUFFER_NIL;
-            }
+            else if (buf[0] == 0xff && buf[1] == 0xee)
+                return BufferType.BUFFER_AAC_ASC;
+            //else
+            //{
+            //    //// the MP2 is not "clean", due to the 2nd buffer's unknown first two bytes
+            //    //// Do NOT use the MODE_MP2 yet
+            //    //if (buf[0] == 0xff && (buf[1] & 0xf0) == 0xf0)
+            //    //    return BufferType.BUFFER_MP2_1;
+            //    //if (Mode == AudioMode.MODE_MP2) // then second frame of TWO_FRAMES MP2 service
+            //    //    return BufferType.BUFFER_MP2_2;
+            //}
+            else if (buf[0] == 0x55 && buf[1] == 0xaa)
+                return BufferType.BUFFER_COMMAND;
+            else
+                return BufferType.BUFFER_NIL;
         }
     }
 }

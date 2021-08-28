@@ -222,7 +222,7 @@ namespace softsyst.qirx.audiodecoder
         /// <param name="bytesConsumed">Information from the decoder</param>
         /// <returns></returns>
         public unsafe int decode(IntPtr hDecoder, byte[] buffer, int startIx, out byte[] decoded, 
-            out int bytesConsumed, out int samplingRate, out int channels, out int objectType)
+           out int samplingRate, out int channels, out int objectType)
         {
 #if AAC_TEST
             if (fs != null)
@@ -247,7 +247,6 @@ namespace softsyst.qirx.audiodecoder
                                                   ref pfaad.hinfo, p, buffer.Length,
                                                   (Byte**)ppMem, maxOutBufferLen);
 
-                        bytesConsumed = 
                         samplingRate = (int)pfaad.hinfo.samplereate;
                         channels = (int)pfaad.hinfo.channels;
                         objectType = (int)pfaad.hinfo.object_type;
