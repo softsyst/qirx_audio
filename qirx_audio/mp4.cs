@@ -236,6 +236,7 @@ namespace softsyst.qirx.Audio
                 logger.Info(string.Format("UDPCmd connected to: {0}:{1}", ipCmd.Address, ipCmd.Port));
                 Console.WriteLine(string.Format("UDPCmd connected to: {0}:{1}", ipCmd.Address, ipCmd.Port));
             }
+            Mode = AudioMode.MODE_AAC;
             return true;
         }
 
@@ -317,7 +318,7 @@ namespace softsyst.qirx.Audio
                         // Command arrives on service change
                         case AudioCommands.MODE:
                             AudioMode mode = (AudioMode)par;
-                            Console.WriteLine($"Mode {mode} set ");
+                            Console.WriteLine($"\nMode {mode} set. New connection requested. ");
                             terminatRxThread = true;
                             break;
                         case AudioCommands.MUTE:
@@ -471,6 +472,7 @@ namespace softsyst.qirx.Audio
             if (error != 0)
             {
                 string s = AACDecoder.getErrorMessage((byte)error);
+                Console.WriteLine("libfaad Error: " + s);
                 logger.Error(s);
                 goto exitFunc;
             }
