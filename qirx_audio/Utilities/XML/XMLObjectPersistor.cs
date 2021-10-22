@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
-using log4net;
 using softsyst.Generic.Logger;
 using softsyst.qirx.configuration;
 

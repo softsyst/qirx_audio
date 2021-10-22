@@ -31,7 +31,7 @@ namespace softsyst.qirx.Audio
     /// </summary>
     public class dabDecoderDAB : IDisposable
     {
-        logging<dabDecoderDAB> logger = new logging<dabDecoderDAB>(logging2.log);
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
         enum eFrames { ONE_FRAME, TWO_FRAMES };
         int bitrate;
 
@@ -128,7 +128,7 @@ namespace softsyst.qirx.Audio
             }
             catch (Exception e)
             {
-                logger.Exception(e);
+                logger?.Error(e.Message);
             }
             return false;
         }

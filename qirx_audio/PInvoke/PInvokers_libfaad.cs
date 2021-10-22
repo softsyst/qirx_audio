@@ -18,6 +18,9 @@
 **
 **/
 
+//#define LINUX
+
+
 using System;
 using System.Runtime.InteropServices;
 

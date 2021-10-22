@@ -18,25 +18,24 @@
 **
 **/
 
+using softsyst.Generic;
+using softsyst.Generic.SafeCollections;
+using softsyst.qirx.configuration;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using softsyst.Generic;
-using softsyst.Generic.Logger;
-using softsyst.Generic.SafeCollections;
-using softsyst.qirx.configuration;
 
 namespace softsyst.qirx.Audio
 {
-    public enum eAudioSink { UDPonly, NAudio};
+    public enum eAudioSink { UDPonly, NAudio, PortAudio};
     /// <summary>
     /// Base class with common parts for the NAudio out (windows)
     /// and the udpOnly out (Linux)
     /// </summary>
     public class audioBase :  IAudioSink, IDisposable
     {
-        logging<audioBase> logger = new logging<audioBase>(logging2.log);
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
 
         enum eWaitHandle { WAIT_QUEUE = 0, WAIT_TERMINATE = 1 }
 
@@ -162,6 +161,10 @@ namespace softsyst.qirx.Audio
             {
                 return new wavAudio(name, rxNumber);
             }
+            if (audioSinkType == eAudioSink.PortAudio)
+            {
+                return new PortAudio(name, rxNumber);
+            }
             else if (audioSinkType == eAudioSink.UDPonly)
             {
                 return new audioBase(name, rxNumber);
@@ -208,7 +211,7 @@ namespace softsyst.qirx.Audio
             }
             catch (Exception ex)
             {
-                logger.Exception("Constructor: ", ex);
+                logger.Error("Constructor: ", ex.Message);
             }
         }
 
@@ -231,7 +234,7 @@ namespace softsyst.qirx.Audio
             }
             catch (Exception ex)
             {
-                logger.Exception(ex);
+                logger?.Error(ex.Message);
             }
         }
 
@@ -262,7 +265,7 @@ namespace softsyst.qirx.Audio
             }
             catch (Exception ex)
             {
-                logger.Exception(ex);
+                logger?.Error(ex.Message);
             }
         }
 
@@ -302,11 +305,11 @@ namespace softsyst.qirx.Audio
                     evtTerminate.Set();
                 if (!thrdWorker.Join(500))
                 {
-                    thrdWorker.Abort();
-                    logger.Warning("Worker thread " + thrdWorker.Name + " aborted");
+                    //thrdWorker.Abort();
+                    logger?.Warn("Worker thread " + thrdWorker.Name + " did not terminate after 0.5 sec");
                 }
                 else
-                    logger.Debug("Worker thread " + thrdWorker.Name + "  terminated normally");
+                    logger?.Debug("Worker thread " + thrdWorker.Name + "  terminated normally");
 
                 writeConfiguration();
 
@@ -397,7 +400,7 @@ namespace softsyst.qirx.Audio
                     }
                     catch (Exception ex)
                     {
-                        logger.Exception(ex);
+                        logger?.Error(ex.Message);
                     }
                 }
                 qEvent.Reset();
@@ -405,31 +408,41 @@ namespace softsyst.qirx.Audio
             Dispose();
             logger.Debug(string.Format("Terminating thread {0} ... ", threadName));
         }
+        public void Dispose()
+        {
+            Dispose(true);
+        }
 
         /// <summary>
         /// IDispose satisfaction
         /// </summary>
-        public virtual void Dispose()
+        public virtual void Dispose(bool disposing)
         {
             try
             {
-                logger.Debug(string.Format("Disposing {0} ... ", threadName));
-
-                if (samplesQ != null)
-                    samplesQ.Clear();
-                qEvent.Close();
-                evtTerminate.Close();
-                qEvent = null;
-                evtTerminate = null;
-                eventHandles = null;
-                if (udp != null)
+                if (disposing)
                 {
-                    udp.Close();
+                    logger?.Debug(string.Format("Disposing {0} ... ", threadName));
+
+                    if (samplesQ != null)
+                        samplesQ.Clear();
+                    qEvent.Close();
+                    evtTerminate.Close();
+                    qEvent = null;
+                    evtTerminate = null;
+                    eventHandles = null;
+                    if (udp != null)
+                    {
+                        udp.Close();
+                        udp = null;
+                        logger?.Debug("udp Disposed");
+                    }
+                    GC.SuppressFinalize(this);
                 }
             }
             catch (Exception e)
             {
-                logger.Exception(e);
+                logger?.Error(e.Message);
             }
         }
     }

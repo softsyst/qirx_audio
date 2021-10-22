@@ -26,7 +26,6 @@ namespace softsyst.qirx.configuration
 {
     public class configFileProgram : configFile
     {
-        logging<configFileProgram> logger = new logging<configFileProgram>(logging2.log);
 
         public string PersistenceDirectory { get; set; }
         public string loggingDirectory { get; set; }
@@ -65,7 +64,7 @@ namespace softsyst.qirx.configuration
             }
             catch (Exception e)
             {
-                logger.Error("Error writing configuration: " + e.Message);
+                //logger.Error("Error writing configuration: " + e.Message);
             }
         }
         private void loadLoggingSettings()

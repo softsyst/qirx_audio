@@ -22,14 +22,13 @@ using System.Text;
 using System.IO;
 using softsyst.Generic;
 using softsyst.Generic.Logger;
-using log4net;
 using softsyst.qirx.Interfaces;
 
 namespace softsyst.qirx.configuration
 {
     public abstract class configFile
     {
-        logging<configFile> logger = new logging<configFile>(logging2.log);
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
 
         private static OperatingSystem os = Environment.OSVersion;
         protected static IMsgBox _msgBox = MsgBoxFactory.Create();
@@ -88,7 +87,7 @@ namespace softsyst.qirx.configuration
             }
             catch (Exception ex)
             {
-                logger.Exception(ex);
+                logger?.Error(ex.Message);
                 if (_msgBox != null)
                     _msgBox.Show(ex.Message, "QIRX Configuration Error", "OK", "Error");
             }
@@ -109,7 +108,7 @@ namespace softsyst.qirx.configuration
             }
             catch (Exception ex)
             {
-                logger.Exception(ex);
+                logger?.Error(ex.Message);
                 if (_msgBox != null)
                     _msgBox.Show(ex.Message, "QIRX Configuration Error", "OK", "Error");
             }
@@ -127,12 +126,12 @@ namespace softsyst.qirx.configuration
                 this.GetType().ToString(), ConfigFilePath));
         }
 
-        static ILog ilogger = LogManager.GetLogger(typeof(configFile));
+        //static ILog ilogger = LogManager.GetLogger(typeof(configFile));
         public static bool createConfigFile(string path)
         {
             try
             {
-                logging2.logInfo(ilogger, "Creating config file: " + path );
+                //logging2.logInfo(ilogger, "Creating config file: " + path );
                 byte[] bytes = new ASCIIEncoding().GetBytes(configFileTemplate);
 
                 using (FileStream f = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite))
@@ -144,7 +143,7 @@ namespace softsyst.qirx.configuration
             {
                 if (_msgBox != null)
                     _msgBox.Show("Error on creating config file: " + ex.Message, "QIRX Configuration Error", "OK", "Stop");
-                logging2.logError(ilogger, ex.Message );
+                //logging2.logError(ilogger, ex.Message );
                 return false;
             }
             return true;

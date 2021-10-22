@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.IO;
-using log4net;
 using softsyst.Generic.Logger;
 using System.Threading;
 
@@ -13,7 +12,7 @@ namespace softsyst.Generic.XML
 {
     public sealed class XMLHelper
     {
-        static ILog logger = LogManager.GetLogger(typeof(XMLHelper));
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Useful static xml functions
@@ -39,8 +38,8 @@ namespace softsyst.Generic.XML
             }
             catch(Exception)
             {
-                logging2.logError(logger, string.Format("Reading Configuration failed. Path = {0}, xPath = {1}",
-                   path, xPath));
+                //logging2.logError(logger, string.Format("Reading Configuration failed. Path = {0}, xPath = {1}",
+                //   path, xPath));
                 return null;
             }
         }
@@ -70,8 +69,8 @@ namespace softsyst.Generic.XML
             }
             catch(Exception e)
             {
-                logging2.logError(logger, string.Format("Reading Configuration failed. Path = {0}, Node name = {1}, Attribute Name = {2}, Error = {3}",
-                   path, nodeName, attribName, e.Message));
+                //logging2.logError(logger, string.Format("Reading Configuration failed. Path = {0}, Node name = {1}, Attribute Name = {2}, Error = {3}",
+                //   path, nodeName, attribName, e.Message));
                 return string.Empty;
             }
         }
@@ -91,8 +90,8 @@ namespace softsyst.Generic.XML
             }
             catch (Exception e)
             {
-                logging2.logError(logger, string.Format("Writing Configuration failed. Path = {0}, Node name = {1}, Attribute Name = {2}, Attribute Value = {3}, Error = {4}",
-                   path, node_xPath, attributeName, attributeValue, e.Message));
+                //logging2.logError(logger, string.Format("Writing Configuration failed. Path = {0}, Node name = {1}, Attribute Name = {2}, Attribute Value = {3}, Error = {4}",
+                //   path, node_xPath, attributeName, attributeValue, e.Message));
             }
             finally
             {

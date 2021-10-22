@@ -35,7 +35,7 @@ namespace softsyst.qirx.configuration
     // !!In particular mute == false!!
     public class configFileWavOut : configFile
     {
-        logging<configFileWavOut> logger = new logging<configFileWavOut>(logging2.log);
+        //logging<configFileWavOut> logger = new logging<configFileWavOut>(logging2.log);
 
         string modulation;
         //Read Configuration
@@ -71,7 +71,7 @@ namespace softsyst.qirx.configuration
             }
             catch (Exception ex)
             {
-                logger.Exception(ex);
+                //logger.Exception(ex);
                 sUdpPort = "8765"; //default
                 sUdpIPAddress = "255.255.255.255"; //default
             }

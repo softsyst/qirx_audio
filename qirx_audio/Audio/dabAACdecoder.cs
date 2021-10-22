@@ -35,7 +35,7 @@ namespace softsyst.qirx.audiodecoder
     /// <remarks>Decoupling of the pinvoked calls enable the rest of the SW.</remarks>
     public unsafe class aacDecoder : IDisposable
     {
-		logging<aacDecoder> logger = new logging<aacDecoder>(logging2.log);
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Track whether Dispose has been called.
@@ -57,7 +57,7 @@ namespace softsyst.qirx.audiodecoder
             }
 			catch (Exception ex)
             {
-				logger.Exception (ex);
+				logger?.Error (ex.Message);
                 return (IntPtr)0;
             }       
         }
@@ -76,7 +76,7 @@ namespace softsyst.qirx.audiodecoder
             }
             catch (Exception ex)
             {
-				logger.Exception (ex);
+                logger?.Error(ex.Message);
                 throw;
             }       
         }
@@ -121,7 +121,7 @@ namespace softsyst.qirx.audiodecoder
             }
             catch (Exception ex)
             {
-				logger.Exception (ex);
+                logger.Error(ex.Message);
                 throw;
             }
         }
@@ -159,7 +159,7 @@ namespace softsyst.qirx.audiodecoder
             }
             catch (Exception ex)
             {
-				logger.Exception (ex);
+                logger.Error(ex.Message);
                 throw;
             }
         }
@@ -187,7 +187,7 @@ namespace softsyst.qirx.audiodecoder
                 }
             catch (Exception ex)
             {
-				logger.Exception (ex);
+                logger.Error(ex.Message);
                 throw;
             }
         }
@@ -276,7 +276,7 @@ namespace softsyst.qirx.audiodecoder
             }
             catch (Exception ex)
             {
-				logger.Exception (ex);
+                logger.Error(ex.Message);
                 throw;
             }
         }

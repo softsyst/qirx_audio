@@ -31,7 +31,7 @@ namespace softsyst.qirx.Audio
     /// </summary>
     public class wavAudio : audioBase 
     {
-        logging<wavAudio> logger = new logging<wavAudio>(logging2.log);
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// NAudio elements
@@ -54,7 +54,7 @@ namespace softsyst.qirx.Audio
             }
             catch (Exception ex)
             {
-                logger.Exception("Constructor: ", ex);
+                logger?.Error("Constructor: ", ex.Message);
             }
         }
 
@@ -96,7 +96,7 @@ namespace softsyst.qirx.Audio
             }
             catch(Exception e)
             {
-                logger.Exception(e);
+                logger?.Error( e.Message);
             }
             base.doWork();
         }
@@ -104,22 +104,22 @@ namespace softsyst.qirx.Audio
         /// <summary>
         /// Implements IDisposable
         /// </summary>
-        public override void Dispose()
+        public override void Dispose(bool disposing)
         {
             try
             {
-                base.Dispose();
                 //if (wavWriter != null)
                 //    wavWriter.Dispose();
                 if (wavOut != null)
                     wavOut.Dispose();
                 //if (wavBufProvider != null)
                 //    wavBufProvider.Dispose(); //not existing
+                base.Dispose(disposing);
                 logger.Info("WAV Audio disposed");
             }
             catch (Exception e)
             {
-                logger.Exception(e);
+                logger?.Error(e.Message);
             }
         }
     }

@@ -31,12 +31,14 @@ namespace softsyst.qirx.Audio
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("QIRX AAC stream player V1.3");
-            Console.WriteLine("Copyright (c) softsyst GmbH and Clem Schmidt, 2019-2021, qirx.softsyst.com\n");
+            Console.WriteLine("QIRX AAC stream player V2.0");
+            Console.WriteLine("Copyright (c) Clem Schmidt, 2019-2021, qirx.softsyst.com\n");
 
             Console.WriteLine("libfaad2 is Copyright (C) 2003-2005 M. Bakker, Nero AG, http://www.nero.com\n");
             Console.WriteLine("NAudio is an open source .NET audio library written by Mark Heath (mark.heath@gmail.com)");
             Console.WriteLine("For more information, visit http://github.com/naudio/NAudio");
+            Console.WriteLine("PortAudio Portable Real-Time Audio Library, Copyright (c) 1999-2011 Ross Bencina and Phil Burk");
+            Console.WriteLine("PortAudio P/Invoke interfacing based on work by Atsushi Eno, https://github.com/atsushieno/portaudio-sharp");
 
             Console.WriteLine("\n The following UDP Addresses and ports are used:");
             Console.WriteLine("\tAAC Streams: \tRemote endpoint:\t 127.0.0.1:8766");

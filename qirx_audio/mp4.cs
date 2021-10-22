@@ -68,7 +68,7 @@ namespace softsyst.qirx.Audio
 
     class mp4
     {
-        logging<mp4> logger = new logging<mp4>(logging2.log);
+        private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
 
         public dabAACInfo AACInfo { get; private set; } = new dabAACInfo();
         const int AACHeaderLength = 7; //without crc
@@ -537,7 +537,8 @@ namespace softsyst.qirx.Audio
 
             if (waudio != null)
                 clear();
-            waudio = softsyst.qirx.Audio.wavAudio.create(eAudioSink.NAudio, "MP4", 0); 
+            waudio = softsyst.qirx.Audio.wavAudio.create(eAudioSink.PortAudio, "MP4", 0); 
+            //waudio = softsyst.qirx.Audio.wavAudio.create(eAudioSink.NAudio, "MP4", 0); 
             if (waudio == null)
             {
                 logger.Error("Cannot create audio sink MP4");
@@ -546,7 +547,7 @@ namespace softsyst.qirx.Audio
 
             if (channels > 2)
             {
-                logger.Warning($"{channels} audio channels detected. Reduced to two");
+                logger?.Warn($"{channels} audio channels detected. Reduced to two");
                 channels = 2;
             }
             waudio.Init(sample_rate, 16, channels);
