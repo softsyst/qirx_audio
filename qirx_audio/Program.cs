@@ -29,9 +29,11 @@ namespace softsyst.qirx.Audio
 {
     class Program
     {
+        static private char inChar = ' ';
+
         static void Main(string[] args)
         {
-            Console.WriteLine("QIRX AAC stream player V2.0");
+            Console.WriteLine("QIRX AAC stream player V2.1");
             Console.WriteLine("Copyright (c) Clem Schmidt, 2019-2021, qirx.softsyst.com\n");
 
             Console.WriteLine("libfaad2 is Copyright (C) 2003-2005 M. Bakker, Nero AG, http://www.nero.com\n");
@@ -49,8 +51,6 @@ namespace softsyst.qirx.Audio
             // Endless loop, only terminated by closing the exe.
             // The two threads are created on startup and/or selection of a service,
             // one for the commands, and one for the audio stream to be decoded.
-            // Both run until the next service is selected. 
-            // Then, the loop continues.
             while(true)
             {
 
@@ -61,8 +61,16 @@ namespace softsyst.qirx.Audio
 
                 Thread threadRx = new Thread(MP4.UDPReceiveSync);
                 threadRx.Start();
+
+                //// TODO, threads run still forever.
+                //while (inChar != 'X')
+                //{
+                //    string inp = Console.ReadLine();
+                //    inChar = inp[0];
+                //}
+                //MP4.terminateCmdThread = true;
+
                 threadRx.Join();
-                MP4.terminateCmdThread = true;
                 threadCmd.Join();
             }
         }

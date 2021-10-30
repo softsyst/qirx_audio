@@ -1,0 +1,1 @@
+dotnet publish qirx_audio -r debian.11-x64 -c Debug /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true

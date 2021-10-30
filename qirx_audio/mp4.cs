@@ -81,7 +81,7 @@ namespace softsyst.qirx.Audio
         /// <summary>
         /// C# to libfaad link
         /// </summary>
-        aacDecoder AACDecoder;
+        aacDecoder AACDecoder = new aacDecoder();
 
         /// <summary>
         /// C# to kjmp link
@@ -207,14 +207,16 @@ namespace softsyst.qirx.Audio
         }
 
         static object lockProcessBuffer = new object();
+        static object lockOpenFlag = new object();
+        bool aacInitialized = false;
 
 
         public mp4()
         {
-            init();
+            initUDP();
         }
 
-        private bool init()
+        private bool initUDP()
         {
             if (udp != null)
             {
@@ -222,22 +224,37 @@ namespace softsyst.qirx.Audio
                 logger.Info(string.Format("\nUDP connected to: {0}:{1}", ip.Address, ip.Port));
                 Console.WriteLine(string.Format("\nUDP connected to: {0}:{1}", ip.Address, ip.Port));
             }
-            AACDecoder = new aacDecoder();
-            hDecoder = AACDecoder.open();
-            if (hDecoder == (IntPtr)0)
-            {
-                //_msgBox.Show("Open AACDecoder failed");
-                return false;
-            }
-
             if (udpCmd != null)
             {
                 udpCmd.Connect(ipCmd);
                 logger.Info(string.Format("UDPCmd connected to: {0}:{1}", ipCmd.Address, ipCmd.Port));
                 Console.WriteLine(string.Format("UDPCmd connected to: {0}:{1}", ipCmd.Address, ipCmd.Port));
             }
-            Mode = AudioMode.MODE_AAC;
             return true;
+        }
+
+        private bool openAAC()
+        {
+            hDecoder = AACDecoder.open();
+            if (hDecoder == (IntPtr)0)
+            {
+                Console.WriteLine("Open AACDecoder failed");
+                return false;
+            }
+
+            Mode = AudioMode.MODE_AAC;
+            Console.WriteLine("AAC Decoder opened");
+            return true;
+        }
+
+        private void closeAAC()
+        {
+            if (hDecoder != (IntPtr)0)
+            {
+                AACDecoder.Close(hDecoder);
+                hDecoder = (IntPtr)0;
+            }
+            Console.WriteLine("AAC Decoder closed");
         }
 
         private void processCommand(byte[] buf)
@@ -270,26 +287,24 @@ namespace softsyst.qirx.Audio
             Console.WriteLine("Command thread entered.");
             if (udpCmd == null || udpCmd.Client == null)
                 return;
-            udpCmd.Client.ReceiveTimeout =  200;
+            udpCmd.Client.ReceiveTimeout =  0;
             while (true)
             {
                 try
                 {
+                    Console.WriteLine("Waiting for command...");
                     byte[] buf = udpCmd.Receive(ref remoteIpCmd);
 
                     lock (lockProcessBuffer)
                     {
-                        if (terminateCmdThread)
-                            break;
                         if (buf == null || buf.Length == 0)
                             continue;
                         processCommand(buf);
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    if (terminateCmdThread)
-                        break;
+                    Console.WriteLine("Exc. in Cmd thread: " + e.Message);
                 }
             }
             if (udpCmd != null)
@@ -300,11 +315,26 @@ namespace softsyst.qirx.Audio
             }
         }
 
+        private bool AACOpenFlag = false;
+
+        private void setAACOpenFlag(bool par)
+        {
+            lock (lockOpenFlag)
+            {
+                AACOpenFlag = par;
+            }
+        }
+
+        private bool getAACOpenFlag()
+        {
+            lock (lockOpenFlag)
+            {
+                return AACOpenFlag;
+            }
+        }
+
         private bool processCmd(byte[] buf)
         {
-            if (waudio == null)
-                return false;
-
             try
             {
                 if (buf.Length >= 7)
@@ -319,10 +349,14 @@ namespace softsyst.qirx.Audio
                         case AudioCommands.MODE:
                             AudioMode mode = (AudioMode)par;
                             Console.WriteLine($"\nMode {mode} set. New connection requested. ");
-                            terminatRxThread = true;
+                            setAACOpenFlag(false);
+                            closeAAC();
+                            openAAC();
+                            _initialized = false;
+                            setAACOpenFlag(true);
                             break;
                         case AudioCommands.MUTE:
-                            if (Mode == AudioMode.MODE_NIL)
+                            if (Mode == AudioMode.MODE_NIL || waudio == null)
                                 return false;
                             waudio.Mute = par == 1 ? true : false;
                             string onoff = waudio.Mute ? "on" : "off";
@@ -368,17 +402,14 @@ namespace softsyst.qirx.Audio
                 try
                 {
                     byte[] buf = udp.Receive(ref remoteIp);
-
-                    bool result = processAACBuffer(buf);
-                    if (!result)
-                        break;
+                    if (getAACOpenFlag())
+                        processAACBuffer(buf);
                 }
-                catch (Exception )
+                catch (Exception e)
                 {
-                    break;
+                    Console.WriteLine("Exc. in rx thread: " + e.Message);
                 }
             }
-            reset();
         }
 
         private bool processAACBuffer(byte[] buf)
@@ -386,11 +417,6 @@ namespace softsyst.qirx.Audio
             bool result = true;
             lock (lockProcessBuffer)
             {
-                // This MUST be within the lock. Otherwise a race can occur and a possible crash in the libfaad decoder.
-                if (terminatRxThread)
-                {
-                    return false;
-                }
 
                 BufferType buftype = parseHeader(buf);
 
@@ -405,7 +431,6 @@ namespace softsyst.qirx.Audio
                     }
                     else
                     {
-
                         byte[] pcm16 = null;
                         if (processBuffer(buf, out pcm16, buftype))
                         {
@@ -591,16 +616,6 @@ namespace softsyst.qirx.Audio
             if (waudio != null)
                 waudio.Stop();
             waudio = null;
-            if (udp != null)
-                udp.Close();
-            udp = null;
-            Console.WriteLine("UDP closed");
-            if (hDecoder != (IntPtr)0)
-            {
-                AACDecoder.Close(hDecoder);
-                hDecoder = (IntPtr)0;
-                Console.WriteLine("AAC Decoder closed");
-            }
         }
 
 
