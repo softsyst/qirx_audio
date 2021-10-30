@@ -8,3 +8,19 @@
 - **Important Remark:
 The cooperation with QIRX works ONLY with the _libfaad.dll_ built with the sources provided here.** The original libfaad2.dll is NOT able to cope with ADTS headers together with 960samples frames, which are produced by DAB+. 
 - To work together with QIRX, all binaries must be contained in the **_qirx_audio_** subdirectory of the QIRX runtime. This is already prepared when downloading QIRX.
+#### V2.0 (November 2021) 
+- net5 Version
+- Now features PortAudio as its audio engine.
+- With the #define LINUX, it works also on Linux (tested on Debian 11.1). Identical codebase.
+#### Linux Build for Debian 11 in VS2019 on Windows
+- In VS, search for //#define LINUX and un-comment it.
+- Do a "Rebuild All",
+- On a Windows Command Line, run the script "build_qirxAudioLinux.bat" (without the quotation marks),
+- This will produce the executable file **qirx_audio** (sic, without extension)
+- In Debian, copy it to your directory of choice.
+- Make sure that in the Linux search path for shared libraries the file **libportaudio.so.2** is present.
+- Run ./qirx_audio
+
+Please note that the **installation of net5 on Debian is NOT necessary**, as the qirx_audio is self-contained (the reason for its size).
+#### Credit 
+PortAudio P/Invoke interfacing based on work by Atsushi Eno, https://github.com/atsushieno/portaudio-sharp
