@@ -5,7 +5,7 @@
 - Receives raw AAC frames (with ASC headers) and/or commands from QIRX and creates **PCM16** samples for **PortAudio**, as well as status responses returned via UDP.  
 - Uses the **UDP** ports: 8766, 8767, 8768, 8769.
 - Uses the **libfaad2** library as AAC decoder.  
-- To work together with QIRX, all binaries must be contained in the **_qirx_audio_** subdirectory of the QIRX runtime. When using the QIRX isntaller for Windows, this is already prepared.
+- To work together with QIRX, all binaries must be contained in the **_qirx_audio_** subdirectory of the QIRX runtime. When using the QIRX installer for Windows, this is already prepared.
 #### V2.0 (November 2021) 
 - net5 Version
 - Change from ADTS to ASC headers.
