@@ -208,7 +208,6 @@ namespace softsyst.qirx.Audio
 
         static object lockProcessBuffer = new object();
         static object lockOpenFlag = new object();
-        bool aacInitialized = false;
 
 
         public mp4()
