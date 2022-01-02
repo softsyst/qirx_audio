@@ -32,7 +32,7 @@ namespace softsyst.qirx.configuration
 
         private static OperatingSystem os = Environment.OSVersion;
         protected static IMsgBox _msgBox = MsgBoxFactory.Create();
-        private static string configFileName = "qirx.config";
+        //private static string configFileName = "qirx.config";
 
         public static string ConfigFilePath {get; private set;}
 
@@ -46,6 +46,7 @@ namespace softsyst.qirx.configuration
         public static bool createOrVerifyConfigFile(bool create = true)
         {
             return false;
+            /*
             string path = System.AppDomain.CurrentDomain.BaseDirectory + configFileName;
             if (!File.Exists(path))
             {
@@ -72,6 +73,7 @@ namespace softsyst.qirx.configuration
             }
             ConfigFilePath = path;
             return true;
+            */
         }
 
         // Deprecated to be removed

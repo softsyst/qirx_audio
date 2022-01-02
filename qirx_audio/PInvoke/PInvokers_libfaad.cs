@@ -29,27 +29,15 @@ namespace softsyst.qirx.PInvoke
 {
     static public class libfaadCalls
     {
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecOpen", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecOpen", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern public static IntPtr NeAACDecOpen();
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecClose", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecClose", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern public static void NeAACDecClose(IntPtr hDecoder);
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecInit2", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecInit2", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static byte NeAACDecInit2(
             IntPtr hDecoder,
             byte* pBuffer,
@@ -59,22 +47,14 @@ namespace softsyst.qirx.PInvoke
             );
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecInitDRM", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecInitDRM", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static int NeAACDecInitDRM(
             IntPtr hDecoder,
             Int32 samplerate,
             byte channels
             );
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecInit", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecInit", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static int NeAACDecInit(
             IntPtr hDecoder,
             byte* pBuffer,
@@ -86,20 +66,12 @@ namespace softsyst.qirx.PInvoke
 
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecGetErrorMessage", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecGetErrorMessage", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static Byte* NeAACDecGetErrorMessage(byte errcode);
 
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecDecode", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecDecode", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static Byte* NeAACDecDecode(
             IntPtr hDecoder,
             ref PInvoke_libfaad2.frameInfo frameInfo,
@@ -108,11 +80,7 @@ namespace softsyst.qirx.PInvoke
             );
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecDecode2", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecDecode2", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static Byte* NeAACDecDecode2(
             IntPtr hDecoder,
             ref PInvoke_libfaad2.frameInfo frameInfo,
@@ -124,11 +92,7 @@ namespace softsyst.qirx.PInvoke
 
 
 
-#if LINUX
         [DllImport("libfaad.so", EntryPoint = "NeAACDecGetCurrentConfiguration", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("libfaad2.dll", EntryPoint = "NeAACDecGetCurrentConfiguration", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         extern unsafe public static Byte* NeAACDecGetCurrentConfiguration(IntPtr hDecoder);
     }
 

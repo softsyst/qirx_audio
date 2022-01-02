@@ -17,7 +17,7 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
 **/
-#define LINUX
+//#define LINUX
 using System;
 using System.Runtime.InteropServices;
 
@@ -26,20 +26,11 @@ namespace softsyst.qirx.PInvoke
 {
     static public class c_libraryCalls
     {
-#if LINUX
         [DllImport("libc", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         public unsafe static extern IntPtr memcpy(IntPtr dest, IntPtr src, uint count);
 
 
-#if LINUX
         [DllImport("libc", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("msvcrt.dll", EntryPoint = "memset", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
         public unsafe static extern IntPtr memset(IntPtr dest, int c, int byteCount);
-
     }
 }

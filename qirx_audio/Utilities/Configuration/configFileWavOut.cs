@@ -69,7 +69,7 @@ namespace softsyst.qirx.configuration
                 if (!IPAddress.TryParse(sUdpIPAddress, out addr))
                     throw new Exception("Invalid udp IPAddress");
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 //logger.Exception(ex);
                 sUdpPort = "8765"; //default

@@ -33,7 +33,7 @@ namespace softsyst.qirx.Audio
     {
         private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
         enum eFrames { ONE_FRAME, TWO_FRAMES };
-        int bitrate;
+        //int bitrate;
 
         eFrames noOfFrames;
 

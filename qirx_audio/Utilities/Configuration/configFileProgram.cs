@@ -62,7 +62,7 @@ namespace softsyst.qirx.configuration
                 base.writeConfiguration();
                 XMLHelper.writeSingleXMLNodeAttrib(ConfigFilePath, "./Display/UpdateIntervalMs", "value", displayUpdateIntervalMs.ToString());
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 //logger.Error("Error writing configuration: " + e.Message);
             }

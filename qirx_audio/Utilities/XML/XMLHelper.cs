@@ -67,7 +67,7 @@ namespace softsyst.Generic.XML
                 string s = node.Attributes.GetNamedItem(attribName).Value;
                 return s;
             }
-            catch(Exception e)
+            catch(Exception )
             {
                 //logging2.logError(logger, string.Format("Reading Configuration failed. Path = {0}, Node name = {1}, Attribute Name = {2}, Error = {3}",
                 //   path, nodeName, attribName, e.Message));
@@ -88,7 +88,7 @@ namespace softsyst.Generic.XML
                 node.Attributes.GetNamedItem(attributeName).Value = attributeValue;
                 doc.Save(path);
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 //logging2.logError(logger, string.Format("Writing Configuration failed. Path = {0}, Node name = {1}, Attribute Name = {2}, Attribute Value = {3}, Error = {4}",
                 //   path, node_xPath, attributeName, attributeValue, e.Message));

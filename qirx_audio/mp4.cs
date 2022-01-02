@@ -30,6 +30,7 @@ using softsyst.Generic.Logger;
 using softsyst.Generic;
 using softsyst.qirx.DAB;
 using softsyst.qirx.Interfaces;
+using System.Reflection;
 
 namespace softsyst.qirx.Audio
 {
@@ -69,6 +70,7 @@ namespace softsyst.qirx.Audio
     class mp4
     {
         private readonly NLog.ILogger logger = NLog.LogManager.GetCurrentClassLogger();
+        //static ImportResolver _impResolve;// = new ImportResolver(Assembly.GetExecutingAssembly());
 
         public dabAACInfo AACInfo { get; private set; } = new dabAACInfo();
         const int AACHeaderLength = 7; //without crc
@@ -86,7 +88,7 @@ namespace softsyst.qirx.Audio
         /// <summary>
         /// C# to kjmp link
         /// </summary>
-        dabDecoderDAB DABDecoder;
+        //dabDecoderDAB DABDecoder;
 
         /// <summary>
         /// Audio interface
@@ -306,12 +308,12 @@ namespace softsyst.qirx.Audio
                     Console.WriteLine("Exc. in Cmd thread: " + e.Message);
                 }
             }
-            if (udpCmd != null)
-            {
-                udpCmd.Close();
-                udpCmd = null;
-                Console.WriteLine("UDPCmd closed.");
-            }
+            //if (udpCmd != null)
+            //{
+            //    udpCmd.Close();
+            //    udpCmd = null;
+            //    Console.WriteLine("UDPCmd closed.");
+            //}
         }
 
         private bool AACOpenFlag = false;

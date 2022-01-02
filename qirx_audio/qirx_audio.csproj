@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <!--<RuntimeIdentifiers>debian.11-x64</RuntimeIdentifiers>-->
     <AssemblyVersion>2.0</AssemblyVersion>
     <FileVersion>2.0</FileVersion>

@@ -18,7 +18,7 @@
 **
 **/
 
-#define LINUX
+//#define LINUX
 
 using System;
 using System.Runtime.InteropServices;
@@ -27,26 +27,13 @@ namespace softsyst.qirx.PInvoke
 {
     static public class kjmp2Calls
     {
-#if LINUX
-        [DllImport("kjmp2.so", EntryPoint = "mp2_initialize", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("kjmp2.dll", EntryPoint = "mp2_initialize", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
+        [DllImport("kjmp2", EntryPoint = "mp2_initialize", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         extern unsafe public static int mp2_initialize();
 
-
-#if LINUX
-        [DllImport("kjmp2.so", EntryPoint = "mp2_getSampleRate", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("kjmp2.dll", EntryPoint = "mp2_getSampleRate", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
+        [DllImport("kjmp2", EntryPoint = "mp2_getSampleRate", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         extern unsafe public static int mp2_getSampleRate(Byte* buf);
 
-#if LINUX
-        [DllImport("kjmp2.so", EntryPoint = "mp2_decode", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#else
-        [DllImport("kjmp2.dll", EntryPoint = "mp2_decode", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-#endif
+        [DllImport("kjmp2", EntryPoint = "mp2_decode", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         extern unsafe public static int mp2_decode(Byte* buf, int len, Byte* pcm);
 
     }

@@ -15,8 +15,6 @@ using PaTime			= System.Double;
 //using PaSampleFormat		= System.UInt64;	// typedef unsigned long 	PaSampleFormat
 //using PaStream			= System.Void;		// typedef void 	PaStream
 using PaStreamFlags		= System.UInt32;
-using softsyst.Generic;
-using System.Reflection;
 // typedef unsigned long 	PaStreamFlags
 #endregion
 
@@ -30,6 +28,7 @@ namespace Commons.Media.PortAudio
 	public delegate void PaStreamFinishedCallback (IntPtr/*void **/userData);
 	#endregion
 
+#if LINUX
 	unsafe public static class PortAudioInterop
     {
         static PortAudioInterop()
@@ -229,11 +228,211 @@ namespace Commons.Media.PortAudio
  
 	#endregion
     }
+#else
+	unsafe public static class PortAudioInterop
+	{
+		static PortAudioInterop()
+		{
+			Pa_Initialize();
+			AppDomain.CurrentDomain.DomainUnload += (o, args) => Pa_Terminate();
+		}
 
+		#region Functions
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		int Pa_GetVersion(/*void*/)
+			;
 
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		/*const*/ IntPtr/*char * */ 	Pa_GetVersionText(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		/*const*/ IntPtr/*char * */ 	Pa_GetErrorText(PaError errorCode)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_Initialize(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_Terminate(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaHostApiIndex Pa_GetHostApiCount(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaHostApiIndex Pa_GetDefaultHostApi(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		/*const*/ IntPtr/*PaHostApiInfo * */ 	Pa_GetHostApiInfo(PaHostApiIndex hostApi)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaHostApiIndex Pa_HostApiTypeIdToHostApiIndex(PaHostApiTypeId type)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaDeviceIndex Pa_HostApiDeviceIndexToDeviceIndex(PaHostApiIndex hostApi, int hostApiDeviceIndex)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		/*const*/ IntPtr/*PaHostErrorInfo * */ 	Pa_GetLastHostErrorInfo(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaDeviceIndex Pa_GetDeviceCount(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaDeviceIndex Pa_GetDefaultInputDevice(/*void*/)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaDeviceIndex Pa_GetDefaultOutputDevice(/*void*/)
+			;
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		/*const*/ IntPtr/*PaDeviceInfo * */ 	Pa_GetDeviceInfo(PaDeviceIndex device)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_IsFormatSupported(/*const*/IntPtr/*PaStreamParameters * */inputParameters, /*const*/
+		int*/*PaStreamParameters * */outputParameters, double sampleRate);
+		//IntPtr/*PaStreamParameters * */outputParameters, double sampleRate);
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_OpenStream(out IntPtr/*PaStream ** */stream,
+								   /*const*/IntPtr/*PaStreamParameters * */inputParameters,
+								   /*const*/IntPtr/*PaStreamParameters * */outputParameters,
+								   double sampleRate,
+								   [MarshalAs(UnmanagedType.SysUInt)] /*unsigned long*/uint framesPerBuffer,
+								   [MarshalAs(UnmanagedType.SysUInt)] PaStreamFlags streamFlags,
+								   PaStreamCallback streamCallback, IntPtr/*void **/userData)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_OpenDefaultStream(out IntPtr/*PaStream ** */stream,
+										  int numInputChannels,
+										  int numOutputChannels,
+										  [MarshalAs(UnmanagedType.SysUInt)] IntPtr/*PaSampleFormat*/ sampleFormat,
+										  double sampleRate,
+										  [MarshalAs(UnmanagedType.SysUInt)] /*unsigned long*/IntPtr framesPerBuffer, PaStreamCallback streamCallback, IntPtr/*void **/userData)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_CloseStream(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_SetStreamFinishedCallback(IntPtr/*PaStream * */stream,
+												  PaStreamFinishedCallback streamFinishedCallback)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_StartStream(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_StopStream(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_AbortStream(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_IsStreamStopped(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_IsStreamActive(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		/*const*/ IntPtr/*PaStreamInfo * */	Pa_GetStreamInfo(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaTime Pa_GetStreamTime(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		double Pa_GetStreamCpuLoad(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		PaError Pa_ReadStream(IntPtr/*PaStream * */stream, IntPtr/*void **/buffer,
+								   [MarshalAs(UnmanagedType.SysUInt)] /*unsigned long*/uint frames)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		unsafe public static extern
+		PaError Pa_WriteStream(IntPtr stream, byte* buffer, uint frames)
+			;
+		//PaError Pa_WriteStream(IntPtr/*PaStream * */stream, /*const*/IntPtr/*void **/buffer,
+		//							[MarshalAs(UnmanagedType.SysUInt)] /*unsigned long*/uint frames)
+		//	;
+
+		[DllImport("libportaudio64bit.dll")]
+		[return: MarshalAs(UnmanagedType.SysInt)]
+		public static extern
+		/*signed long*/int Pa_GetStreamReadAvailable(IntPtr/*PaStream * */stream)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		[return: MarshalAs(UnmanagedType.SysUInt)]
+		public static extern
+		/*signed long*/int Pa_GetStreamWriteAvailable(IntPtr/*PaStream * */stream)
+			;
+
+		// Return value is originally defined as PaError but this should rather make sense.
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		int Pa_GetSampleSize([MarshalAs(UnmanagedType.SysUInt)] PaSampleFormat format)
+			;
+
+		[DllImport("libportaudio64bit.dll")]
+		public static extern
+		void Pa_Sleep([MarshalAs(UnmanagedType.SysInt)] /*long*/int msec)
+			;
+
+		#endregion
+	}
+#endif
 #if !USE_CXXI
 
-    public static class Factory
+	public static class Factory
 	{
 		// NOT WORKING Compiler complaint //
 		unsafe public static CppInstancePtr ToNative<T> (T value)

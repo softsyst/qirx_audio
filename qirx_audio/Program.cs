@@ -23,17 +23,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using System.Threading;
+using softsyst.Generic;
 
 namespace softsyst.qirx.Audio
 {
     class Program
     {
-        static private char inChar = ' ';
-
+        static ImportResolver _impResolve;
+        //static private char inChar = ' ';
         static void Main(string[] args)
         {
-            Console.WriteLine("QIRX AAC stream player V2.1");
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            Console.WriteLine("QIRX AAC stream player V2.2");
             Console.WriteLine("Copyright (c) Clem Schmidt, 2019-2021, qirx.softsyst.com\n");
 
             Console.WriteLine("libfaad2 is Copyright (C) 2003-2005 M. Bakker, Nero AG, http://www.nero.com\n");
@@ -47,6 +50,10 @@ namespace softsyst.qirx.Audio
             Console.WriteLine("\tAAC Streams: \tOwn endpoint:\t\t 127.0.0.1:8767");
             Console.WriteLine("\tCommands: \tRemote endpoint:\t 127.0.0.1:8768");
             Console.WriteLine("\tCommands: \tOwn endpoint: \t\t 127.0.0.1:8769\n");
+
+            _impResolve = new ImportResolver(assembly);
+            if (_impResolve != null)
+                Console.WriteLine($"\tImport Resolver for assembly {assembly} created.\n");
 
             // Endless loop, only terminated by closing the exe.
             // The two threads are created on startup and/or selection of a service,
