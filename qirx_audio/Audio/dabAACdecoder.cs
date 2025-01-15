@@ -224,6 +224,7 @@ namespace softsyst.qirx.audiodecoder
         public unsafe int decode(IntPtr hDecoder, byte[] buffer, int startIx, out byte[] decoded, 
            out int samplingRate, out int channels, out int objectType)
         {
+            samplingRate = channels = objectType = 0;
 #if AAC_TEST
             if (fs != null)
             {
@@ -244,9 +245,8 @@ namespace softsyst.qirx.audiodecoder
                         //This is important for avoiding memory leaks.
                         //That memory is once allocated in the constructor of always sufficient size, and released on disposing.
                         Byte* pMemAlias = libfaadCalls.NeAACDecDecode2(hDecoder,
-                                                  ref pfaad.hinfo, p, buffer.Length,
+                                                  ref pfaad.hinfo, p, buffer.Length-startIx,
                                                   (Byte**)ppMem, maxOutBufferLen);
-
                         samplingRate = (int)pfaad.hinfo.samplereate;
                         channels = (int)pfaad.hinfo.channels;
                         objectType = (int)pfaad.hinfo.object_type;
@@ -277,8 +277,9 @@ namespace softsyst.qirx.audiodecoder
             catch (Exception ex)
             {
                 logger.Error(ex.Message);
-                throw;
+                //throw;
             }
+            return -1;
         }
 
 

@@ -100,12 +100,12 @@ namespace softsyst.qirx.Audio
         /// <summary>
         /// udp streaming , own endpoint
         /// </summary>
-        UdpClient udp = new UdpClient(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), 8767));
+        UdpClient udp = new UdpClient(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Program.audioBasePort+1));
 
         /// <summary>
         /// remote IP endpoint for udp streaming, default port can be overridden in the config file qirx.config
         /// </summary>
-        IPEndPoint ip = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), 8766);
+        IPEndPoint ip = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Program.audioBasePort);
 
         /// <summary>
         /// Set by the receiving function
@@ -115,12 +115,12 @@ namespace softsyst.qirx.Audio
         /// <summary>
         /// udp command, own endpoint
         /// </summary>
-        UdpClient udpCmd = new UdpClient(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), 8769));
+        UdpClient udpCmd = new UdpClient(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Program.audioBasePort+3));
 
         /// <summary>
         /// remote IP endpoint for udp command, default port can be overridden in the config file qirx.config
         /// </summary>
-        IPEndPoint ipCmd = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), 8768);
+        IPEndPoint ipCmd = new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Program.audioBasePort+2);
 
         /// <summary>
         /// Set by the command receiving function
@@ -136,6 +136,9 @@ namespace softsyst.qirx.Audio
         /// Flag used from cmd thread on arrival of a new service
         /// </summary>
         internal bool terminatRxThread = false;
+
+        internal bool MuteOnRequest = false;
+        internal bool MuteOffRequest = false;
 
         /// <summary>
         /// Audio sampling rate
@@ -357,11 +360,23 @@ namespace softsyst.qirx.Audio
                             setAACOpenFlag(true);
                             break;
                         case AudioCommands.MUTE:
+                            if (par == 1)
+                            {
+                                MuteOnRequest = true;
+                                MuteOffRequest = false;
+                            }
+                            else
+                            {
+                                MuteOnRequest = false;
+                                MuteOffRequest = true;
+                            }
                             if (Mode == AudioMode.MODE_NIL || waudio == null)
                                 return false;
                             waudio.Mute = par == 1 ? true : false;
                             string onoff = waudio.Mute ? "on" : "off";
                             Console.WriteLine($"Audio Mute {onoff} ");
+                            MuteOnRequest = false;
+                            MuteOffRequest = false;
                             break;
                         case AudioCommands.UDP:
                             if (Mode == AudioMode.MODE_NIL)
@@ -433,6 +448,8 @@ namespace softsyst.qirx.Audio
                     else
                     {
                         byte[] pcm16 = null;
+
+                        // buffer buf is "as received"
                         if (processBuffer(buf, out pcm16, buftype))
                         {
                             AudioStateArray = collectAudioStates();
@@ -486,7 +503,7 @@ namespace softsyst.qirx.Audio
             if (buftype != BufferType.BUFFER_AAC_ASC)
                 goto exitFunc;
 
-            int startIx = 4;
+            int startIx = 4; // two bytes magic ASC header type, two bytes header
             int error = AACDecoder.decode(hDecoder, rxBuf, startIx, out pcm16,
                 out decoderSamplingRate, out decoderChannels, out decoderObjectType);
             AACInfo.DecoderSamplingRate = decoderSamplingRate;
@@ -578,6 +595,11 @@ namespace softsyst.qirx.Audio
             }
             waudio.Init(sample_rate, 16, channels);
             waudio.Start();
+            if (MuteOffRequest)
+                waudio.Mute = false;
+            else if (MuteOnRequest)
+                waudio.Mute = true;
+            MuteOnRequest = MuteOffRequest = false;
             _initialized = true;
             logger.Debug("AAC and waudio initialized");
             
