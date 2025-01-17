@@ -375,8 +375,8 @@ namespace softsyst.qirx.Audio
                             waudio.Mute = par == 1 ? true : false;
                             string onoff = waudio.Mute ? "on" : "off";
                             Console.WriteLine($"Audio Mute {onoff} ");
-                            MuteOnRequest = false;
-                            MuteOffRequest = false;
+                            //MuteOnRequest = false;
+                            //MuteOffRequest = false;
                             break;
                         case AudioCommands.UDP:
                             if (Mode == AudioMode.MODE_NIL)

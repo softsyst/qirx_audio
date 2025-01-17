@@ -63,7 +63,7 @@ namespace softsyst.qirx.Audio
         /// </summary>
         protected override void play()
         {
-            if (wavOut != null)
+            if (wavOut != null && Mute == false)
                 wavOut.Play();
         }
 
