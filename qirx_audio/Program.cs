@@ -53,7 +53,7 @@ namespace softsyst.qirx.Audio
             // its name returns the full path of the DLL, NOT the one of the exe
             Assembly assembly = Assembly.GetExecutingAssembly();
 
-            Console.WriteLine("QIRX AAC stream player V2.3");
+            Console.WriteLine("QIRX AAC stream player V2.4");
             Console.WriteLine("Copyright (c) Clem Schmidt, 2019-2025, qirx.softsyst.com\n");
 
             Console.WriteLine("libfaad2 is Copyright (C) 2003-2005 M. Bakker, Nero AG, http://www.nero.com\n");

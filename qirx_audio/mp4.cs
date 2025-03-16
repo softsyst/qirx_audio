@@ -500,10 +500,14 @@ namespace softsyst.qirx.Audio
 
             // the asc header is always contained and ignored here
             // the first two bytes are the buffer type id of 0xff, 0xee
-            if (buftype != BufferType.BUFFER_AAC_ASC)
+                int startIx = 0; // two bytes magic ASC header type, two bytes header
+            if (buftype == BufferType.BUFFER_AAC_ASC)
+                startIx = 4; // two bytes magic ASC header type, two bytes header
+            else if (buftype == BufferType.BUFFER_AAC_DTS) // 0xFF, 0xF1 at startIx 0
+                startIx = 0;
+            else
                 goto exitFunc;
 
-            int startIx = 4; // two bytes magic ASC header type, two bytes header
             int error = AACDecoder.decode(hDecoder, rxBuf, startIx, out pcm16,
                 out decoderSamplingRate, out decoderChannels, out decoderObjectType);
             AACInfo.DecoderSamplingRate = decoderSamplingRate;
@@ -524,7 +528,6 @@ namespace softsyst.qirx.Audio
                 byte[] pcm16Buf = audioOutBuf.createBuffer(pcm16);
                 if (pcm16Buf != null)
                     waudio.AddSamples(pcm16Buf, 0, pcm16Buf.Length);
-                //else is a normal operating case indicating that the const size buffer is not yet ready
             }
             result = true;
 
